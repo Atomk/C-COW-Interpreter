@@ -14,8 +14,9 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MEMORY_SIZE 100     // Must be greater than 0
+#define MEMORY_SIZE 100
 #define COMMAND_LENGTH 3
+#define MAX_NUMBER_OF_INSTRUCTIONS 100
 
 enum { INVALID_COMMAND=-1, moo=0, mOo, moO, mOO, Moo, MOo, MoO, MOO, OOO, MMM, OOM, oom };
 
@@ -25,10 +26,6 @@ short currentBlockIndex = MEMORY_SIZE / 2;
 // Register, necessary for instruction MMM
 short reg = 0;
 short isRegisterInitialized = FALSE;
-
-#define MAX_NUMBER_OF_INSTRUCTIONS 100
-short opcodesArray[MAX_NUMBER_OF_INSTRUCTIONS];
-short *jumpTable[MAX_NUMBER_OF_INSTRUCTIONS];
 
 // "quick exit" demo
 char *sourceCode = "OOOMOomOO";
@@ -222,34 +219,22 @@ short execCommand(short commandCode, short caller, short currentLOC)
     return currentLOC + 1;
 }
 
-
-/***********************
-         MAIN
-***********************/
-
-
-int main()
+// Reads a string containing the source code of a program, finds
+// the instruction code (opcode) of every command and puts it into an array.
+// Returns the number of commands in the program
+// (assuming there's a command per line, returns the number of lines of code)
+short parser(char *sourceCode, short *opcodesArray, short opcodesArrayLength)
 {
-    printf("Number of memory blocks: %d\n", MEMORY_SIZE);
-    printf("Index of current block: %d\n", currentBlockIndex);
-    
-    short commandCode = INVALID_COMMAND;
     short numberOfInstructions = 0;
-    int i = 0;
-    
-    // Initialize memory to zeros
-    for (i = 0; i < MEMORY_SIZE; i++)
-    {
-        memoryBlocksArray[i] = 0;
-    }
-    
     short suitableCharCount = 0;
+    short commandCode = INVALID_COMMAND;
     char commandName[COMMAND_LENGTH];
+    short i = 0;
 
     // Read source code to find commands
     for(i = 0; sourceCode[i] != '\0'; i++)
     {
-        // If the current character can be part of a command
+        // Check if the current character can be part of a command
         switch(sourceCode[i])
         {
             case 'm':
@@ -261,6 +246,7 @@ int main()
             default:
                 // As per specification, any character that is not part of a command is ignored
                 suitableCharCount = 0;
+                // Skip to next character
                 continue;
         }
 
@@ -276,15 +262,18 @@ int main()
 
             commandCode = getCommandCode(commandName);
 
-            // If the found string is a valid command
+            // If the found string is a valid COW command
             if(commandCode != INVALID_COMMAND)
             {
                 printf("Found command: %s (%d)\n", commandName, commandCode);
                 
-                if(numberOfInstructions < MAX_NUMBER_OF_INSTRUCTIONS)
+                if(numberOfInstructions < opcodesArrayLength)
                 {
                     opcodesArray[numberOfInstructions] = commandCode;
                     numberOfInstructions++;
+                }
+                else {
+                    exitWithError("parser", "too many instructions, not enough space in opcodes array");
                 }
             }
             else
@@ -296,6 +285,33 @@ int main()
         }
     }
 
+    return numberOfInstructions;
+}
+
+
+/***********************
+         MAIN
+***********************/
+
+
+int main()
+{
+    printf("Number of memory blocks: %d\n", MEMORY_SIZE);
+    printf("Index of current block: %d\n", currentBlockIndex);
+    
+    int i = 0;
+    
+    // Initialize memory to zeros
+    for (i = 0; i < MEMORY_SIZE; i++)
+    {
+        memoryBlocksArray[i] = 0;
+    }
+    
+    // PARSE PROGRAM
+
+    short opcodesArray[MAX_NUMBER_OF_INSTRUCTIONS];
+    short numberOfInstructions = parser(sourceCode, opcodesArray, MAX_NUMBER_OF_INSTRUCTIONS);
+    
     // EXECUTE PROGRAM
 
     i = 0;
