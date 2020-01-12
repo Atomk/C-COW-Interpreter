@@ -247,10 +247,10 @@ int main()
     short numberOfInstructions = 0;
     int i = 0;
     
-    // Initialize memory
+    // Initialize memory to zeros
     for (i = 0; i < MEMORY_SIZE; i++)
     {
-        memoryBlocksArray[i] = INVALID_VALUE;
+        memoryBlocksArray[i] = 0;
     }
     
     // Read source code to find commands
