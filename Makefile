@@ -1,6 +1,6 @@
 CC=gcc
 CLANG=-Wall -g
-FILENAME=cowInterpreter
+FILENAME=cow-interpreter
 
 all: $(FILENAME)
 

@@ -21,7 +21,7 @@ enum { INVALID_COMMAND=-1, moo=0, mOo, moO, mOO, Moo, MOo, MoO, MOO, OOO, MMM, O
 #define MEMORY_SIZE 100             // https://stackoverflow.com/a/13645995
 
 // If a memory block (or register) contains this value, the block is considered uninitialized
-const short INVALID_VALUE = -999;
+#define INVALID_VALUE -999
 short memoryBlocksArray[MEMORY_SIZE];
 
 // Register, necessary for instruction MMM. Must be the same type as memoryBlocksArray
@@ -127,7 +127,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
             break;
 
         case 3:
-
+        
             // Execute value in current memory block as if it were an instruction.
             // The command executed is based on the instruction code value (see https://bigzaphod.github.io/COW/)
             // (for example, if the current memory block contains a 2, then the moO command is executed).
@@ -137,7 +137,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
                 exitWithError("mOO", "cannot use value 3, it would cause an infinite loop.");
             }
             else {
-                execCommand(memoryBlocksArray[currentBlockIndex], mOO);
+                execCommand(memoryBlocksArray[currentBlockIndex], mOO, currentLOC);
             }
             break;
 
@@ -297,55 +297,13 @@ int main()
                 suitableCharCount--;
             }
         }
+    }
 
-        i = 0;
-        // Invalid line of code number
-        const short INVALID_LOC_NUMBER = -1;
-        short numberOfJumps = 0;
-        short lastMOOindex = INVALID_LOC_NUMBER;
+    // EXECUTE PROGRAM
 
-        while(i < numberOfInstructions)
-        {
-            if(opcodesArray[i] == MOO)
-            {
-                lastMOOindex = i;
-                i += 2;
-            }
-            else if(opcodesArray[i] == moo)
-            {
-                if(lastMOOindex != INVALID_LOC_NUMBER)
-                {
-                    // TODO if i+1 == numberOfInstructions (if this moo is the last instruction) program should exit successfully
-                    if()
-                    jumpTable[numberOfJumps] = { lastMOOindex, i+1 };
-                    // Reset so we can find another matching moo
-                    lastMOOindex = INVALID_LOC_NUMBER;
-                }
-                else
-                {
-                    exitWithError("parser", "Encountered a moo instruction without a matching MOO command.");
-                }
-            }
-            else
-            {
-                i++;
-            }
-        }
-
-        if(lastMOOindex != INVALID_LOC_NUMBER) {
-            exitWithError("parser", "Found a MOO command without a matching moo.");
-        }
-
-        // EXECUTE PROGRAM
-
-        i = 0;
-        while(i < numberOfInstructions) {
-            execCommand(opcodesArray[i], -1);
-            i++;
-        }
-
-        // TODO crea un array coi codici dei comandi e poi da lì esegui
-        // anzi crea una funzione parser() che restituisce un array con gli opcode delle istruzioni
+    i = 0;
+    while(i < numberOfInstructions) {
+        i = execCommand(opcodesArray[i], -1, i);
     }
 
     printf("Reached end of source code.\n");
