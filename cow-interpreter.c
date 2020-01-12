@@ -149,7 +149,11 @@ short execCommand(short commandCode, short caller, short currentLOC)
             if(memoryBlocksArray[currentBlockIndex] == 0) {
                 exitWithError("Moo", "not implemented yet");
             } else {
-                execCommand(OOM, Moo);
+                if(memoryBlocksArray[currentBlockIndex] > 0 && memoryBlocksArray[currentBlockIndex] < 256) {
+                    printf("%c", memoryBlocksArray[currentBlockIndex]);
+                } else {
+                    exitWithError("Moo", "this character cannot be printed to STDOUT.");
+                }
             }
             break;
 
