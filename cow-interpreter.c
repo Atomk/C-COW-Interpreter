@@ -11,26 +11,20 @@
 ***********************/
 
 
-const char TRUE = 1;
-const char FALSE = 0;
+#define TRUE 1
+#define FALSE 0
+
+#define MEMORY_SIZE 100     // Must be greater than 0
+#define COMMAND_LENGTH 3
 
 enum { INVALID_COMMAND=-1, moo=0, mOo, moO, mOO, Moo, MOo, MoO, MOO, OOO, MMM, OOM, oom };
 
-// Must be greater than 0
-//const short MEMORY_SIZE = 100;    // Gives error when initilizing memory array at file scope
-#define MEMORY_SIZE 100             // https://stackoverflow.com/a/13645995
-
-// If a memory block (or register) contains this value, the block is considered uninitialized
-#define INVALID_VALUE -999
 short memoryBlocksArray[MEMORY_SIZE];
-
-// Register, necessary for instruction MMM. Must be the same type as memoryBlocksArray
-short reg = INVALID_VALUE;
-
 short currentBlockIndex = MEMORY_SIZE / 2;
-short suitableCharCount = 0;
 
-char commandName[4] = { 0, 0, 0, '\0' };
+// Register, necessary for instruction MMM
+short reg = 0;
+short isRegisterInitialized = FALSE;
 
 #define MAX_NUMBER_OF_INSTRUCTIONS 100
 short opcodesArray[MAX_NUMBER_OF_INSTRUCTIONS];
@@ -42,7 +36,6 @@ char *sourceCode = "OOOMOomOO";
 //char *sourceCode = "OOOMoOMoOMoOMoOMoOMoOMoOMoOMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmooOOOMoOMoOMoOMoOMoOMoOmOoMMMmoOmoOMMMMOOMOomOoMoOmoOmoomOoMoomOoMMMmoOMMMmOomOoMMMmoOmoOmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoomOoMMMmoOMMMMoOMoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMooMOoMOoMOoMoo";
 
 
-
 /***********************
          FUNCTIONS
 ***********************/
@@ -50,12 +43,12 @@ char *sourceCode = "OOOMOomOO";
 
 // Returns true if the two command strings are equal
 // C does not have built-in string comparison (it's in string.h)
-// Assumes strings have the same length and length is 3
+// Assumes strings have the same length
 short commandNamesEqual(char *a, char *b)
 {
     int i=0;
 
-    for(i = 0; i < 3; i++)
+    for(i = 0; i < COMMAND_LENGTH; i++)
     {
         if(a[i] != b[i])
             return FALSE;
@@ -97,7 +90,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
 {
     switch (commandCode)
     {
-        case 0:
+        case 0: // moo
         
             // This command is connected to the MOO command. When encountered during normal execution,
             // it searches the program code in reverse looking for a matching MOO command
@@ -106,7 +99,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
             exitWithError("moo", "not implemented yet");
             break;
 
-        case 1:
+        case 1: // mOo
 
             // Moves current memory position back one block
             if(currentBlockIndex > 0) {
@@ -116,7 +109,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
             }
             break;
 
-        case 2:
+        case 2: // moO
 
             // Moves current memory position forward one block
             if(currentBlockIndex < MEMORY_SIZE - 1) {
@@ -126,22 +119,22 @@ short execCommand(short commandCode, short caller, short currentLOC)
             }
             break;
 
-        case 3:
+        case 3: // mOO
         
             // Execute value in current memory block as if it were an instruction.
             // The command executed is based on the instruction code value (see https://bigzaphod.github.io/COW/)
             // (for example, if the current memory block contains a 2, then the moO command is executed).
             // An invalid command exits the running program.
-            // Value 3 is invalid as it would cause an infinite loop.
-            if(memoryBlocksArray[currentBlockIndex] == 3) {
-                exitWithError("mOO", "cannot use value 3, it would cause an infinite loop.");
+            // Cannot call itself, as it would cause an infinite loop.
+            if(memoryBlocksArray[currentBlockIndex] == commandCode) {
+                exitWithError("mOO", "cannot call itself, it would cause an infinite loop.");
             }
             else {
                 execCommand(memoryBlocksArray[currentBlockIndex], mOO, currentLOC);
             }
             break;
 
-        case 4:
+        case 4: // Moo
 
             // If current memory block has a 0 in it, read a single ASCII character from STDIN and store it in the current memory block.
             // If the current memory block is not 0, then print the ASCII character that corresponds to the value in the current memory block to STDOUT.
@@ -157,19 +150,19 @@ short execCommand(short commandCode, short caller, short currentLOC)
             }
             break;
 
-        case 5:
+        case 5: // MOo
 
             // Decrement current block value by 1
             memoryBlocksArray[currentBlockIndex]--;
             break;
 
-        case 6:
+        case 6: // MoO
 
             // Increment current block value by 1
             memoryBlocksArray[currentBlockIndex]++;
             break;
 
-        case 7:
+        case 7: // MOO
 
             // If current memory block value is 0, skip next command and resume execution *after* the next matching moo command.
             // If current memory block value is not 0, then continue with next command.
@@ -183,31 +176,32 @@ short execCommand(short commandCode, short caller, short currentLOC)
             // else do nothing
             break;
 
-        case 8:
+        case 8: // OOO
         
             // Set current memory block value to zero
             memoryBlocksArray[currentBlockIndex] = 0;
             break;
 
-        case 9:
+        case 9: // MMM
 
             // If no current value in register, copy current memory block value.
             // If there is a value in the register, then paste that value into the current memory block and clear the register.
-            if(reg == INVALID_VALUE) {
+            if(!isRegisterInitialized) {
                 reg = memoryBlocksArray[currentBlockIndex];
+                isRegisterInitialized = TRUE;
             } else {
                 memoryBlocksArray[currentBlockIndex] = reg;
-                reg = INVALID_VALUE;
+                isRegisterInitialized = FALSE;
             }
             break;
 
-        case 10:
+        case 10: // OOM
 
             // Print value of current memory block to STDOUT as an integer
             printf("%d", memoryBlocksArray[currentBlockIndex]);
             break;
 
-        case 11:
+        case 11: // oom
 
             // Read an integer from STDIN and put it into the current memory block
             exitWithError("oom", "not implemented yet");
@@ -249,6 +243,9 @@ int main()
         memoryBlocksArray[i] = 0;
     }
     
+    short suitableCharCount = 0;
+    char commandName[COMMAND_LENGTH];
+
     // Read source code to find commands
     for(i = 0; sourceCode[i] != '\0'; i++)
     {
@@ -268,7 +265,7 @@ int main()
         }
 
         // This works because every COW instruction is exactly 3 characters long
-        if(suitableCharCount == 3)
+        if(suitableCharCount == COMMAND_LENGTH)
         {
             suitableCharCount = 0;
 
