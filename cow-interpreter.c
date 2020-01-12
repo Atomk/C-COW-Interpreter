@@ -83,7 +83,7 @@ short getCommandCode(char *commandName)
 
 // Executes the command with the given command code.
 // Returns index of the next line of code to execute
-short execCommand(short commandCode, short caller, short currentLOC)
+short execCommand(short commandCode, short currentLOC)
 {
     switch (commandCode)
     {
@@ -127,7 +127,16 @@ short execCommand(short commandCode, short caller, short currentLOC)
                 exitWithError("mOO", "cannot call itself, it would cause an infinite loop.");
             }
             else {
-                execCommand(memoryBlocksArray[currentBlockIndex], mOO, currentLOC);
+                // If the current block contains an executable command
+                // TODO it would be better to have a function to check this
+                if(memoryBlocksArray[currentBlockIndex] >= 0 && memoryBlocksArray[currentBlockIndex] <= 11) {
+                    execCommand(memoryBlocksArray[currentBlockIndex], currentLOC);
+                } else {
+                    /* TODO: from "mOO" description is not clear if the program should exit correctly or with an arror.
+                    Since there is no other way to exit, it shouldn't be an error I guess (only if the function is called because of mOO) */
+                    printf("[mOO]: quit program");
+                    exit(EXIT_SUCCESS);
+                }
             }
             break;
 
@@ -206,14 +215,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
 
         default:
 
-            if(caller == mOO) {
-                /* TODO: from "mOO" description is not clear if the program should exit correctly or with an arror.
-                Since there is no other way to exit, it shouldn't be an error I guess (only if the function is called because of mOO) */
-                printf("[mOO]: quit program");
-                exit(EXIT_SUCCESS);
-            } else {
-                exitWithError("execCommand()", "invalid command code.");
-            }
+            exitWithError("execCommand()", "invalid command code.");
     }
 
     return currentLOC + 1;
@@ -316,7 +318,7 @@ int main()
 
     i = 0;
     while(i < numberOfInstructions) {
-        i = execCommand(opcodesArray[i], -1, i);
+        i = execCommand(opcodesArray[i], i);
     }
 
     printf("Reached end of source code.\n");
