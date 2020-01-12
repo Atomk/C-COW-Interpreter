@@ -1,7 +1,3 @@
-// TODO: allow reading source code from a file
-// and solve all to-dos...
-// Should also get rid of global variables since apparently they are evil
-
 #include <stdio.h>  // Used for printf()
 #include <stdlib.h> // Used for exit()
 
