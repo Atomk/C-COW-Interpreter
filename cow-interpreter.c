@@ -200,15 +200,7 @@ short execCommand(short commandCode, short caller, short currentLOC)
         case 10:
 
             // Print value of current memory block to STDOUT as an integer
-            if(memoryBlocksArray[currentBlockIndex] != INVALID_VALUE) {
-                if(memoryBlocksArray[currentBlockIndex] > 0 && memoryBlocksArray[currentBlockIndex] < 256) {
-                    printf("%c", memoryBlocksArray[currentBlockIndex]);
-                } else {
-                    exitWithError(caller == Moo ? "Moo" : "OOM", "this character cannot be printed to STDOUT.");
-                }
-            } else {
-                exitWithError(caller == Moo ? "Moo" : "OOM", "there's nothing in the current block.");
-            }
+            printf("%d", memoryBlocksArray[currentBlockIndex]);
             break;
 
         case 11:
