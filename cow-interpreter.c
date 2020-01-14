@@ -339,11 +339,20 @@ int main()
     
     // EXECUTE PROGRAM
 
-    i = 0;
 
+    const short MAX_ITERATIONS = 2000;
+    short iterations = 0;
+    i = 0;
+    
     while(i < numberOfInstructions)
     {
         i = execCommand(opcodesArray[i], opcodesArray, i, numberOfInstructions);
+
+        iterations++;
+
+        if(iterations >= MAX_ITERATIONS) {
+            exitWithError("runner", "program is taking too long, infinite loop?");
+        }
     }
 
     printf("Reached end of source code.\n");
