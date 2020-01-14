@@ -12,3 +12,8 @@ An interpreter for the [COW](https://bigzaphod.github.io/COW/) language, written
 - [x] Implement `moo`
 - [ ] Implement STDIN-related commands
 - [ ] Allow reading source code from a file
+- [ ] Fix 99 bottles
+- [ ] Fix Hello World
+- [ ] Add links to programs to try
+- [ ] Add tests
+- [ ] Make sure code follows best practices (`enum`, `const`, `define`, etc.)
