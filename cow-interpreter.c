@@ -12,7 +12,7 @@
 
 #define MEMORY_SIZE 100
 #define COMMAND_LENGTH 3
-#define MAX_NUMBER_OF_INSTRUCTIONS 100
+#define MAX_NUMBER_OF_INSTRUCTIONS 1000
 
 enum { INVALID_COMMAND=-1, moo=0, mOo, moO, mOO, Moo, MOo, MoO, MOO, OOO, MMM, OOM, oom };
 
@@ -24,9 +24,9 @@ short reg = 0;
 short isRegisterInitialized = FALSE;
 
 // "quick exit" demo
-char *sourceCode = "OOOMOomOO";
-// This should print an error, because of unimplemented instruction
-//char *sourceCode = "OOOMoOMoOMoOMoOMoOMoOMoOMoOMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmooOOOMoOMoOMoOMoOMoOMoOmOoMMMmoOmoOMMMMOOMOomOoMoOmoOmoomOoMoomOoMMMmoOMMMmOomOoMMMmoOmoOmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoomOoMMMmoOMMMMoOMoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMooMOoMOoMOoMoo";
+//char *sourceCode = "OOOMOomOO";
+// Prints "Frank"
+char *sourceCode = "OOOMoOMoOMoOMoOMoOMoOMoOMoOMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmooOOOMoOMoOMoOMoOMoOMoOmOoMMMmoOmoOMMMMOOMOomOoMoOmoOmoomOoMoomOoMMMmoOMMMmOomOoMMMmoOmoOmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoomOoMMMmoOMMMMoOMoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMooMOoMOoMOoMoo";
 
 
 /***********************
@@ -77,10 +77,14 @@ short getCommandCode(char *commandName)
     return INVALID_COMMAND;
 }
 
-// Executes the command with the given command code.
-// Returns index of the next line of code to execute
-short execCommand(short commandCode, short currentLOC)
+// Executes the command which corresponds to the given instruction code.
+// Returns index of the next instruction to execute.
+// The first parameter is necessary for the mOO command,
+// the other parameterers are necessary for MOO and moo commands.
+short execCommand(short commandCode, short *instructionsArray, short instructionIndex, short numberOfInstructions)
 {
+    //short commandCode = instructionsArray[instructionIndex];
+
     switch (commandCode)
     {
         case 0: // moo
@@ -89,7 +93,18 @@ short execCommand(short commandCode, short currentLOC)
             // it searches the program code in reverse looking for a matching MOO command
             // and begins executing again starting from the found MOO command.
             // When searching, it skips the instruction that is immediately before it (see MOO).
-            exitWithError("moo", "not implemented yet");
+            
+            instructionIndex -= 2;  // Skip previous instruction
+
+            while (instructionIndex >= 0)
+            {
+                if(instructionsArray[instructionIndex] == MOO)
+                    return instructionIndex;
+                else
+                    instructionIndex--;
+            }
+            
+            exitWithError("moo", "MOO not found.");
             break;
 
         case 1: // mOo
@@ -126,7 +141,7 @@ short execCommand(short commandCode, short currentLOC)
                 // If the current block contains an executable command
                 // TODO it would be better to have a function to check this
                 if(memoryBlocksArray[currentBlockIndex] >= 0 && memoryBlocksArray[currentBlockIndex] <= 11) {
-                    execCommand(memoryBlocksArray[currentBlockIndex], currentLOC);
+                    execCommand(memoryBlocksArray[currentBlockIndex], instructionsArray, instructionIndex, instructionIndex);
                 } else {
                     /* TODO: from "mOO" description is not clear if the program should exit correctly or with an arror.
                     Since there is no other way to exit, it shouldn't be an error I guess (only if the function is called because of mOO) */
@@ -170,10 +185,19 @@ short execCommand(short commandCode, short currentLOC)
             // If current memory block value is not 0, then continue with next command.
             // Note that the fact that it skips the command immediately following it has interesting ramifications for where the matching moo command really is.
             // For example, the following will match the second and not the first moo: OOO MOO moo moo
-            if(memoryBlocksArray[currentBlockIndex] == 0) {
-                exitWithError("MOO", "not implemented yet");
-                // skip next command and resume after next moo command
-                // should give error if no moo found?
+            if(memoryBlocksArray[currentBlockIndex] == 0)
+            {
+                instructionIndex += 2;  // Skip next instruction
+
+                while (instructionIndex < numberOfInstructions)
+                {
+                    if(instructionsArray[instructionIndex] == moo)
+                        return instructionIndex + 1;
+                    else
+                        instructionIndex++;
+                }
+                
+                exitWithError("MOO", "moo not found");
             }
             // else do nothing
             break;
@@ -214,7 +238,7 @@ short execCommand(short commandCode, short currentLOC)
             exitWithError("execCommand()", "invalid command code.");
     }
 
-    return currentLOC + 1;
+    return instructionIndex + 1;
 }
 
 // Reads a string containing the source code of a program, finds
@@ -226,7 +250,10 @@ short parser(char *sourceCode, short *opcodesArray, short opcodesArrayLength)
     short numberOfInstructions = 0;
     short suitableCharCount = 0;
     short commandCode = INVALID_COMMAND;
-    char commandName[COMMAND_LENGTH];
+
+    char commandName[COMMAND_LENGTH + 1];
+    commandName[COMMAND_LENGTH - 1] = '\0';
+
     short i = 0;
 
     // Read source code to find commands
@@ -313,8 +340,10 @@ int main()
     // EXECUTE PROGRAM
 
     i = 0;
-    while(i < numberOfInstructions) {
-        i = execCommand(opcodesArray[i], i);
+
+    while(i < numberOfInstructions)
+    {
+        i = execCommand(opcodesArray[i], opcodesArray, i, numberOfInstructions);
     }
 
     printf("Reached end of source code.\n");

@@ -8,7 +8,7 @@ An interpreter for the [COW](https://bigzaphod.github.io/COW/) language, written
 - `make run`
 
 ## TODO
-- [ ] Implement `MOO`
-- [ ] Implement `moo`
+- [x] Implement `MOO`
+- [x] Implement `moo`
 - [ ] Implement STDIN-related commands
 - [ ] Allow reading source code from a file
