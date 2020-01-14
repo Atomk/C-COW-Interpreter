@@ -339,30 +339,37 @@ int main()
     short numberOfInstructions = parser(sourceCode, opcodesArray, MAX_NUMBER_OF_INSTRUCTIONS);
     printf("Reached end of source code.\n");
     
-    // EXECUTE PROGRAM
-
-    printf("\nExecuting program.\n");
-    printf("Output: ");
-
-    const short MAX_ITERATIONS = 2000;
-    short iterations = 0;
-    i = 0;
-    
-    while(i < numberOfInstructions)
+    if(numberOfInstructions > 0)
     {
-        i = execCommand(opcodesArray[i], opcodesArray, i, numberOfInstructions);
+        // EXECUTE PROGRAM
 
-        iterations++;
+        printf("\nExecuting program.\n");
+        printf("Output: ");
 
-        if(iterations >= MAX_ITERATIONS) {
-            exitWithError("runner", "program is taking too long, infinite loop?");
+        const short MAX_ITERATIONS = 2000;
+        short iterations = 0;
+        i = 0;
+
+        while(i < numberOfInstructions)
+        {
+            i = execCommand(opcodesArray[i], opcodesArray, i, numberOfInstructions);
+
+            iterations++;
+
+            if(iterations >= MAX_ITERATIONS) {
+                exitWithError("runner", "program is taking too long, infinite loop?");
+            }
         }
+
+        printf("\nProgram end.\n\n");
+
+        printf("Number of commands in program: %d\n", numberOfInstructions);
+        printf("Number of executed commands: %d\n", iterations);
     }
-
-    printf("\nProgram end.\n\n");
-
-    printf("Number of commands in program: %d\n", numberOfInstructions);
-    printf("Number of executed commands: %d\n", iterations);
-
+    else
+    {
+        printf("No valid commands found.\n");
+    }
+    
     return 0;
 }
