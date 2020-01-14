@@ -52,7 +52,7 @@ short commandNamesEqual(char *a, char *b)
 
 void exitWithError(char *command, char *message)
 {
-    printf("Error [%s]: %s\n", command, message);
+    printf("\nError [%s]: %s\n", command, message);
     // TODO: should find a way to exit from main function, both for clarity and because this causes errors if there's an opened file
     exit(EXIT_FAILURE);
 }
@@ -290,7 +290,7 @@ short parser(char *sourceCode, short *opcodesArray, short opcodesArrayLength)
             // If the found string is a valid COW command
             if(commandCode != INVALID_COMMAND)
             {
-                printf("Found command: %s (%d)\n", commandName, commandCode);
+                //printf("Found command: %s (%d)\n", commandName, commandCode);
                 
                 if(numberOfInstructions < opcodesArrayLength)
                 {
@@ -334,11 +334,15 @@ int main()
     
     // PARSE PROGRAM
 
+    printf("\nStarting parser.\n");
     short opcodesArray[MAX_NUMBER_OF_INSTRUCTIONS];
     short numberOfInstructions = parser(sourceCode, opcodesArray, MAX_NUMBER_OF_INSTRUCTIONS);
+    printf("Reached end of source code.\n");
     
     // EXECUTE PROGRAM
 
+    printf("\nExecuting program.\n");
+    printf("Output: ");
 
     const short MAX_ITERATIONS = 2000;
     short iterations = 0;
@@ -355,7 +359,10 @@ int main()
         }
     }
 
-    printf("Reached end of source code.\n");
+    printf("\nProgram end.\n\n");
+
+    printf("Number of commands in program: %d\n", numberOfInstructions);
+    printf("Number of executed commands: %d\n", iterations);
 
     return 0;
 }
