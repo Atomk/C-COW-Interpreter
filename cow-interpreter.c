@@ -23,11 +23,6 @@ short currentBlockIndex = MEMORY_SIZE / 2;
 short reg = 0;
 short isRegisterInitialized = FALSE;
 
-// "quick exit" demo
-//char *sourceCode = "OOOMOomOO";
-// Prints "Frank"
-char *sourceCode = "OOOMoOMoOMoOMoOMoOMoOMoOMoOMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMMMmoOMMMMOOMOomOoMoOmoOmooOOOMoOMoOMoOMoOMoOMoOmOoMMMmoOmoOMMMMOOMOomOoMoOmoOmoomOoMoomOoMMMmoOMMMmOomOoMMMmoOmoOmoOMMMMOOMOomOoMoOmoOmoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoomOoMMMmoOMMMMoOMoomOoMMMmoOMMMMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMoOMooMOoMOoMOoMoo";
-
 
 /***********************
          FUNCTIONS
@@ -161,6 +156,7 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             } else {
                 if(memoryBlocksArray[currentBlockIndex] > 0 && memoryBlocksArray[currentBlockIndex] < 256) {
                     printf("%c", memoryBlocksArray[currentBlockIndex]);
+                    //printf("%c -- %d\n", memoryBlocksArray[currentBlockIndex], memoryBlocksArray[currentBlockIndex]);
                 } else {
                     exitWithError("Moo", "this character cannot be printed to STDOUT.");
                 }
@@ -313,16 +309,102 @@ short parser(char *sourceCode, short *opcodesArray, short opcodesArrayLength)
     return numberOfInstructions;
 }
 
+short parserFile(char *fileName, short *opcodesArray, short opcodesArrayLength)
+{
+    short numberOfInstructions = 0;
+    short suitableCharCount = 0;
+    short commandCode = INVALID_COMMAND;
+
+    char commandName[COMMAND_LENGTH + 1];
+    commandName[COMMAND_LENGTH - 1] = '\0';
+
+    int c;
+
+    // https://stackoverflow.com/a/3463793
+    FILE *file = fopen(fileName, "r");
+
+    if(!file)
+    {
+        exitWithError("parserfile", "could not open file for reading");
+    }
+
+    // Read source code to find commands
+    while ((c = getc(file)) != EOF)
+    {
+        // Check if the current character can be part of a command
+        switch(c)
+        {
+            case 'm':
+            case 'M':
+            case 'o':
+            case 'O':
+                suitableCharCount++;
+                break;
+            default:
+                // As per specification, any character that is not part of a command is ignored
+                suitableCharCount = 0;
+        }
+
+        // TODO Looks inefficient...
+        commandName[0] = commandName[1];
+        commandName[1] = commandName[2];
+        commandName[2] = c;
+
+        // This works because every COW instruction is exactly 3 characters long
+        if(suitableCharCount == COMMAND_LENGTH)
+        {
+            suitableCharCount = 0;
+
+            commandCode = getCommandCode(commandName);
+
+            // If the found string is a valid COW command
+            if(commandCode != INVALID_COMMAND)
+            {
+                //printf("Found command: %s (%d)\n", commandName, commandCode);
+                
+                if(numberOfInstructions < opcodesArrayLength)
+                {
+                    opcodesArray[numberOfInstructions] = commandCode;
+                    numberOfInstructions++;
+                }
+                else {
+                    // TODO exit() docs state you have to close files before exiting
+                    fclose(file);
+                    exitWithError("parser", "too many instructions, not enough space in opcodes array");
+                }
+            }
+            else
+            {
+                // If source code is "mmoo" -> "mmo" is not a valid command, but "moo" is.
+                // This line allows to check the command validity again if the next character is suitable
+                suitableCharCount--;
+            }
+        }
+    }
+
+    fclose(file);
+
+    return numberOfInstructions;
+}
+
 
 /***********************
          MAIN
 ***********************/
 
 
-int main()
+int main(int argc, char *argv[])
 {
-    printf("Number of memory blocks: %d\n", MEMORY_SIZE);
-    printf("Index of current block: %d\n", currentBlockIndex);
+    char *fileName;
+
+    if(argc == 2)
+    {
+        fileName = argv[1];
+    }
+    else
+    {
+        exitWithError("main", "you should pass exactly one argument, the name of the source code file");
+    }
     
     int i = 0;
     
@@ -336,7 +418,8 @@ int main()
 
     printf("\nStarting parser.\n");
     short opcodesArray[MAX_NUMBER_OF_INSTRUCTIONS];
-    short numberOfInstructions = parser(sourceCode, opcodesArray, MAX_NUMBER_OF_INSTRUCTIONS);
+    short numberOfInstructions = numberOfInstructions = parserFile(fileName, opcodesArray, MAX_NUMBER_OF_INSTRUCTIONS);
+    //short numberOfInstructions = parser(sourceCode, opcodesArray, MAX_NUMBER_OF_INSTRUCTIONS);
     printf("Reached end of source code.\n");
     
     if(numberOfInstructions > 0)
@@ -344,6 +427,8 @@ int main()
         // EXECUTE PROGRAM
 
         printf("\nExecuting program.\n");
+        printf("Number of memory blocks: %d\n", MEMORY_SIZE);
+        printf("Index of current block: %d\n", currentBlockIndex);
         printf("Output: ");
 
         const short MAX_ITERATIONS = 2000;
