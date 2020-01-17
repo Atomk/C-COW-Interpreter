@@ -8,7 +8,8 @@ An interpreter for the [COW](https://bigzaphod.github.io/COW/) language, written
     - `make` or `gcc cow-interpreter.c -o cow-interpreter`
 - Run
     - `cd` in the project's folder
-    - `make run` or `./cow-interpreter <filename>`
+    - `./cow-interpreter <file_path>`, the argument is the path to a COW source file
+        - You can download the samples and use `./cow-interpreter ./examples/hello_world_commented.cow`
 
 If you're on Windows you'll need to use a Unix terminal (command prompt and Powershell won't work), I use [Git Bash](https://gitforwindows.org/). Both GCC and Make can be obtained as part of [MinGW](https://osdn.net/projects/mingw/releases/).
 
