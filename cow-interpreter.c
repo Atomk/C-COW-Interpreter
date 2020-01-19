@@ -387,6 +387,39 @@ short parserFile(char *fileName, short *opcodesArray, short opcodesArrayLength)
     return numberOfInstructions;
 }
 
+void printMemory(short memoryArray[], int arrayLength)
+{
+    int i = 0;
+
+    printf("Memory looks like this:\n");
+    for(i = 0; i < arrayLength; i++)
+    {
+        printf("| %d ", memoryArray[i]);
+    }
+    printf("|");
+
+    printf("\n\nIn ASCII:\n");
+    for(i = 0; i < arrayLength; i++)
+    {
+        switch (memoryArray[i])
+        {
+            case 0:
+                printf("|   ");
+                break;
+            case 10:
+                printf("| LF ");
+                break;
+            case 32:
+                printf("| space ");
+                break;
+            default:
+                printf("| %c ", memoryArray[i]);
+                break;
+        }
+    }
+    printf("|");
+}
+
 
 /***********************
          MAIN
@@ -455,6 +488,9 @@ int main(int argc, char *argv[])
     {
         printf("No valid commands found.\n");
     }
-    
+
+    printf("\n");
+    printMemory(memoryBlocksArray, MEMORY_SIZE);
+
     return 0;
 }
