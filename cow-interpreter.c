@@ -274,8 +274,6 @@ short parser(char *sourceCode, short *opcodesArray, short opcodesArrayLength)
         // This works because every COW instruction is exactly 3 characters long
         if(suitableCharCount == COMMAND_LENGTH)
         {
-            suitableCharCount = 0;
-
             // Turn the three consecutive suitable characters into a string
             commandName[0] = sourceCode[i-2];
             commandName[1] = sourceCode[i-1];
@@ -286,6 +284,8 @@ short parser(char *sourceCode, short *opcodesArray, short opcodesArrayLength)
             // If the found string is a valid COW command
             if(commandCode != INVALID_COMMAND)
             {
+                suitableCharCount = 0;
+                
                 //printf("Found command: %s (%d)\n", commandName, commandCode);
                 
                 if(numberOfInstructions < opcodesArrayLength)
@@ -343,6 +343,7 @@ short parserFile(char *fileName, short *opcodesArray, short opcodesArrayLength)
             default:
                 // As per specification, any character that is not part of a command is ignored
                 suitableCharCount = 0;
+                break;
         }
 
         // TODO Looks inefficient...
@@ -353,13 +354,13 @@ short parserFile(char *fileName, short *opcodesArray, short opcodesArrayLength)
         // This works because every COW instruction is exactly 3 characters long
         if(suitableCharCount == COMMAND_LENGTH)
         {
-            suitableCharCount = 0;
-
             commandCode = getCommandCode(commandName);
 
             // If the found string is a valid COW command
             if(commandCode != INVALID_COMMAND)
             {
+                suitableCharCount = 0;
+
                 //printf("Found command: %s (%d)\n", commandName, commandCode);
                 
                 if(numberOfInstructions < opcodesArrayLength)
