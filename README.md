@@ -11,7 +11,9 @@ An interpreter for the [COW](https://bigzaphod.github.io/COW/) language, written
     - `make` or `gcc cow-interpreter.c -o cow-interpreter`
 - Run
     - `cd` in the project's folder
-    - `./cow-interpreter <filename>`
+    - `./cow-interpreter <file_path>`
+        - The argument is the path to a COW source file
+        - You can use `./cow-interpreter examples/hello_world_commented.cow`
 
 If you're on Windows you'll need to install at least GCC, which can be obtained as part of [MinGW](https://osdn.net/projects/mingw/releases/) (remember to add `path\to\MinGW\bin` to `PATH`).
 
