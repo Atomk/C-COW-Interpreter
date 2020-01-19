@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
         printf("Output: ");
 
         const short MAX_ITERATIONS = 2000;
-        short iterations = 0;
+        unsigned int iterations = 0;
         i = 0;
 
         while(i < numberOfInstructions)
@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
         printf("\nProgram end.\n\n");
 
         printf("Number of commands in program: %d\n", numberOfInstructions);
-        printf("Number of executed commands: %d\n", iterations);
+        printf("Number of executed commands: %u\n", iterations);
     }
     else
     {
