@@ -1,11 +1,4 @@
-[[ Move to next memory block ]]
-[[
-    This is not necessary in my C interpreter but will result in
-    an error in Frank Buss' JS interpreter, because that does not
-    allow moving before the starting memory block, while
-    my interpreter puts the starting position at the "center" of the memory.
-    Said error happens after printing space (line 46)
-]]
+[[ Move to next memory block (index 1) ]]
 moO
 [[ Increment to 32 ]]
 MoO MoO MoO MoO MoO MoO MoO MoO MoO MoO

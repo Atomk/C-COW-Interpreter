@@ -7,17 +7,20 @@
 ***********************/
 
 
+// DO NOT TOUCH THESE
 #define TRUE 1
 #define FALSE 0
-
-#define MEMORY_SIZE 100
 #define COMMAND_LENGTH 3
-#define MAX_NUMBER_OF_INSTRUCTIONS 1000
+
+// You can edit these
+#define MEMORY_SIZE 25                     // Number of memory blocks
+#define MAX_NUMBER_OF_INSTRUCTIONS 2000
+#define MAX_ITERATIONS 500000
 
 enum { INVALID_COMMAND=-1, moo=0, mOo, moO, mOO, Moo, MOo, MoO, MOO, OOO, MMM, OOM, oom };
 
 short memoryBlocksArray[MEMORY_SIZE];
-short currentBlockIndex = MEMORY_SIZE / 2;
+short currentBlockIndex = 0;
 
 // Register, necessary for instruction MMM
 short reg = 0;
@@ -465,7 +468,6 @@ int main(int argc, char *argv[])
         printf("Index of current block: %d\n", currentBlockIndex);
         printf("Output: ");
 
-        const short MAX_ITERATIONS = 2000;
         unsigned int iterations = 0;
         i = 0;
 
