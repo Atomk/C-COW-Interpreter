@@ -81,7 +81,12 @@ short getCommandCode(char *commandName)
 // the other parameterers are necessary for MOO and moo commands.
 short execCommand(short commandCode, short *instructionsArray, short instructionIndex, short numberOfInstructions)
 {
-    //short commandCode = instructionsArray[instructionIndex];
+    // These allow to ignore nested moo/MOO when finding loop start/end
+    // In the following example, the first 'MOO' should match only the last 'moo'
+    // while the last 'moo' should match only the outer 'MOO'
+    // MOO ... MOO ... moo ... moo
+    short MOO_count = 0;
+    short moo_count = 0;
 
     switch (commandCode)
     {
@@ -93,16 +98,28 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             // When searching, it skips the instruction that is immediately before it (see MOO).
             
             instructionIndex -= 2;  // Skip previous instruction
+            moo_count = 0;
 
             while (instructionIndex >= 0)
             {
-                if(instructionsArray[instructionIndex] == MOO)
-                    return instructionIndex;
-                else
-                    instructionIndex--;
+                switch (instructionsArray[instructionIndex])
+                {
+                    case moo:
+                        moo_count++;
+                        break;
+
+                    case MOO:
+                        if(moo_count == 0)
+                            return instructionIndex;
+                        else
+                            moo_count--;
+                        break;
+                }
+
+                instructionIndex--;
             }
             
-            exitWithError("moo", "MOO not found.");
+            exitWithError("MOO", "could not find a matching 'MOO' command");
             break;
 
         case 1: // mOo
@@ -186,17 +203,30 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             // For example, the following will match the second and not the first moo: OOO MOO moo moo
             if(memoryBlocksArray[currentBlockIndex] == 0)
             {
+                MOO_count = 0;
+
                 instructionIndex += 2;  // Skip next instruction
 
                 while (instructionIndex < numberOfInstructions)
                 {
-                    if(instructionsArray[instructionIndex] == moo)
-                        return instructionIndex + 1;
-                    else
-                        instructionIndex++;
+                    switch (instructionsArray[instructionIndex])
+                    {
+                        case moo:
+                            if(MOO_count == 0)
+                                return instructionIndex + 1;
+                            else
+                                MOO_count--;
+                            break;
+                        
+                        case MOO:
+                            MOO_count++;
+                            break;
+                    }
+
+                    instructionIndex++;
                 }
                 
-                exitWithError("MOO", "moo not found");
+                exitWithError("MOO", "could not find a matching 'moo' command");
             }
             // else do nothing
             break;
