@@ -257,6 +257,10 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             break;
 
         case 11: // oom
+            // Added the newline (\n) because the 99bottles and Fibonacci examples assume this,
+            // even though the language specification doesn't say anything about it
+            printf("%d\n", memoryBlocksArray[currentBlockIndex]);
+            break;
 
             // Read an integer from STDIN and put it into the current memory block
             exitWithError("oom", "not implemented yet");
