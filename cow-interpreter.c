@@ -78,7 +78,7 @@ short getCommandCode(char *commandName)
 // Executes the command which corresponds to the given instruction code.
 // Returns index of the next instruction to execute.
 // The first parameter is necessary for the mOO command,
-// the other parameterers are necessary for MOO and moo commands.
+// the other parameters are necessary for MOO and moo commands.
 short execCommand(short commandCode, short *instructionsArray, short instructionIndex, short numberOfInstructions)
 {
     // These allow to ignore nested moo/MOO when finding loop start/end
@@ -90,8 +90,9 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
 
     switch (commandCode)
     {
-        case 0: // moo
+        case 0:
         
+            // moo
             // This command is connected to the MOO command. When encountered during normal execution,
             // it searches the program code in reverse looking for a matching MOO command
             // and begins executing again starting from the found MOO command.
@@ -122,19 +123,23 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             exitWithError("MOO", "could not find a matching 'MOO' command");
             break;
 
-        case 1: // mOo
-
+        case 1:
+        
+            // mOo
             // Moves current memory position back one block
+
             if(currentBlockIndex > 0) {
                 currentBlockIndex--;
             } else {
-                exitWithError("mOo", "not enough memory.");
+                exitWithError("mOo", "trying to access a memory block before the first one.");
             }
             break;
 
-        case 2: // moO
+        case 2:
 
+            // moO
             // Moves current memory position forward one block
+
             if(currentBlockIndex < MEMORY_SIZE - 1) {
                 currentBlockIndex++;
             } else {
@@ -142,13 +147,15 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             }
             break;
 
-        case 3: // mOO
+        case 3:
         
+            // mOO
             // Execute value in current memory block as if it were an instruction.
             // The command executed is based on the instruction code value (see https://bigzaphod.github.io/COW/)
             // (for example, if the current memory block contains a 2, then the moO command is executed).
             // An invalid command exits the running program.
             // Cannot call itself, as it would cause an infinite loop.
+            
             if(memoryBlocksArray[currentBlockIndex] == commandCode) {
                 exitWithError("mOO", "cannot call itself, it would cause an infinite loop.");
             }
@@ -166,11 +173,12 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             }
             break;
 
-        case 4: // Moo
+        case 4:
 
+            // Moo
             // If current memory block has a 0 in it, read a single ASCII character from STDIN and store it in the current memory block.
             // If the current memory block is not 0, then print the ASCII character that corresponds to the value in the current memory block to STDOUT.
-            // (I just call OOM for simplicity since it does exactly that)
+
             if(memoryBlocksArray[currentBlockIndex] == 0) {
                 exitWithError("Moo", "not implemented yet");
             } else {
@@ -183,24 +191,30 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             }
             break;
 
-        case 5: // MOo
-
+        case 5:
+            
+            // MOo
             // Decrement current block value by 1
+
             memoryBlocksArray[currentBlockIndex]--;
             break;
 
-        case 6: // MoO
-
+        case 6:
+            
+            // MoO
             // Increment current block value by 1
+
             memoryBlocksArray[currentBlockIndex]++;
             break;
 
-        case 7: // MOO
-
+        case 7:
+        
+            // MOO
             // If current memory block value is 0, skip next command and resume execution *after* the next matching moo command.
             // If current memory block value is not 0, then continue with next command.
             // Note that the fact that it skips the command immediately following it has interesting ramifications for where the matching moo command really is.
             // For example, the following will match the second and not the first moo: OOO MOO moo moo
+
             if(memoryBlocksArray[currentBlockIndex] == 0)
             {
                 MOO_count = 0;
@@ -231,16 +245,20 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             // else do nothing
             break;
 
-        case 8: // OOO
-        
+        case 8:
+            
+            // OOO
             // Set current memory block value to zero
+            
             memoryBlocksArray[currentBlockIndex] = 0;
             break;
 
-        case 9: // MMM
-
+        case 9:
+        
+            // MMM
             // If no current value in register, copy current memory block value.
             // If there is a value in the register, then paste that value into the current memory block and clear the register.
+            
             if(!isRegisterInitialized) {
                 reg = memoryBlocksArray[currentBlockIndex];
                 isRegisterInitialized = TRUE;
@@ -250,27 +268,29 @@ short execCommand(short commandCode, short *instructionsArray, short instruction
             }
             break;
 
-        case 10: // OOM
-
+        case 10:
+            
+            // OOM
             // Print value of current memory block to STDOUT as an integer
-            printf("%d", memoryBlocksArray[currentBlockIndex]);
-            break;
 
-        case 11: // oom
             // Added the newline (\n) because the 99bottles and Fibonacci examples assume this,
             // even though the language specification doesn't say anything about it
             printf("%d\n", memoryBlocksArray[currentBlockIndex]);
             break;
 
+        case 11:
+        
+            // oom
             // Read an integer from STDIN and put it into the current memory block
+
             exitWithError("oom", "not implemented yet");
             break;
 
         default:
-
             exitWithError("execCommand()", "invalid command code.");
     }
 
+    // If MOO or moo did not return, go to the next instruction
     return instructionIndex + 1;
 }
 
