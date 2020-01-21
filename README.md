@@ -27,15 +27,17 @@ If you're on Windows you'll need to install at least GCC, which can be obtained 
 - [x] Implement `moo`
 - [ ] Implement STDIN-related commands
 - [x] Allow reading source code from a file
-- [ ] Fix 99 bottles
+- [x] Fix 99 bottles
 - [x] Fix Hello World
 - [ ] Simplify comments syntax in the Hello World example
 - [ ] Add links to programs to try
 - [ ] Add tests
 - [ ] Make sure code follows best practices (`enum`, `const`, `define`, etc.)
 - [ ] Remove "TODO" comments in the code
+- [ ] Create a jump table for MOO and moo to avoid looping through the instructions array evey time
+- [ ] Dinamically allocate memory for the instructions array, to avoid using MAX_NUMBER_OF_INSTRUCTIONS and wasting memory
 
 ## Ideas
-- [ ] Create a tool which creates a HTML pag with the instructions with different colors and hovbering the mouse explains what it does
+- [ ] Create a tool which creates a HTML page with the instructions with different colors and hovbering the mouse explains what it does
 - [ ] Create a tool which allows to visualize what every instruction does (visualize memory)
-- [ ] Create a VS Code extension
+- [ ] Create a VS Code extension to highlight commands properly
